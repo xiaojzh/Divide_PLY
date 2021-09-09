@@ -51,15 +51,15 @@ void PLYIO::loadPLY(){
 
 void PLYIO::dividePLY(){
     size_t slidSizeOfPoint = this->numOfPoint / this->NumOfOutFile;
-    Point_XYZ *pts = new Point_XYZ[slidSizeOfPoint];
+    // Point_XYZ *pts = new Point_XYZ[slidSizeOfPoint];
+    Point_XYZ* pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
     for (size_t i = 0; i < this->NumOfOutFile; i++)
     {
         // if (i == (this->NumOfOutFile -1))
         // {
             // slidSizeOfPoint = this->numOfPoint - i * slidSizeOfPoint;
         // }
-        // Point_XYZ *pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeof(Point_XYZ));
-        fread(pts,sizeof(Point_XYZ),slidSizeOfPoint,file_open);
+        fread(pts,sizeOfPoint,slidSizeOfPoint,file_open);
         char* fileName;
         string fileName1;
         fileName1 = "/home/ouong/SLAM/bag/PLYIO/bag/ShanghaiTech_"+ to_string(i) + ".ply";
@@ -72,8 +72,9 @@ void PLYIO::dividePLY(){
 
     // 最后一个文件
     slidSizeOfPoint = this->numOfPoint - slidSizeOfPoint * this->NumOfOutFile;
-    pts = new Point_XYZ[slidSizeOfPoint];
-    fread(pts,sizeof(Point_XYZ),slidSizeOfPoint,file_open);
+    // pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
+    pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
+    fread(pts,sizeOfPoint,slidSizeOfPoint,file_open);
     char* fileName;
     string fileName1;
     fileName1 = "/home/ouong/SLAM/bag/PLYIO/bag/ShanghaiTech_"+ to_string(this->NumOfOutFile) + ".ply";

@@ -25,6 +25,7 @@ struct Point_XYZ
     u_char red;
     u_char green;
     u_char blue;         // 使用时不标记颜色
+    // u_char end;
 };
 
 private:
@@ -47,5 +48,6 @@ private:
     void loadPLY();
     void dividePLY();
     void saveMap(Point_XYZ *point, char *filename, size_t numOfPoint);
+    size_t sizeOfPoint = sizeof(float)*3 + sizeof(u_char)*3;
 };
 #endif
