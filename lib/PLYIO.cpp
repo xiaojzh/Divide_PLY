@@ -62,7 +62,7 @@ void PLYIO::dividePLY(){
         fread(pts,sizeOfPoint,slidSizeOfPoint,file_open);
         char* fileName;
         string fileName1;
-        fileName1 = "/home/ouong/SLAM/bag/PLYIO/bag/ShanghaiTech_"+ to_string(i) + ".ply";
+        fileName1 = "/home/ouong/WorkSpace/BAGs/DividedMap/ShanghaiTech_"+ to_string(i) + ".ply";
         fileName = (char*)fileName1.c_str();
         PLYIO::saveMap(pts,fileName,slidSizeOfPoint);
         // free(pts);
@@ -77,7 +77,7 @@ void PLYIO::dividePLY(){
     fread(pts,sizeOfPoint,slidSizeOfPoint,file_open);
     char* fileName;
     string fileName1;
-    fileName1 = "/home/ouong/SLAM/bag/PLYIO/bag/ShanghaiTech_"+ to_string(this->NumOfOutFile) + ".ply";
+    fileName1 = "/home/ouong/WorkSpace/BAGs/DividedMap/ShanghaiTech_"+ to_string(this->NumOfOutFile) + ".ply";
     fileName = (char*)fileName1.c_str();
     PLYIO::saveMap(pts,fileName,slidSizeOfPoint);
     fclose(this->file_open);
