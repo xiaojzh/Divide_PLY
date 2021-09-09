@@ -24,7 +24,7 @@ bool selectPoint::ply2pcd(){
     // pcl::PLYReader reader;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     // reader.read<pcl::PointXYZ>(this->_in_file,*cloud);
-    if (pcl::io::loadPCDFile<pcl::PointXYZ>(this->_in_file,*cloud) == -1)
+    if (pcl::io::loadPLYFile<pcl::PointXYZ>(this->_in_file,*cloud) == -1)
 	{
 		PCL_ERROR("Couldn't read file sample \n");
 		return (-1);

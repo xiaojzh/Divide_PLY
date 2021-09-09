@@ -119,4 +119,5 @@ bool PLYIO::run(){
     
     PLYIO::loadPLY();
     PLYIO::dividePLY();
+    return true;
 }
