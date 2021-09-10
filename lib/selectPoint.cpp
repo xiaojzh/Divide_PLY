@@ -30,6 +30,9 @@ bool selectPoint::ply2pcd(){
 		PCL_ERROR("Couldn't read file sample \n");
 		return (-1);
 	}
+    cout << "the first point: " <<  cloud->points[0].x << " "
+                                <<  cloud->points[0].y << " "
+                                <<  cloud->points[0].z << endl;
     pcl::VoxelGrid<pcl::PointXYZ> sor;
     sor.setInputCloud (cloud);
     sor.setLeafSize (1.0f, 1.0f, 1.0f);

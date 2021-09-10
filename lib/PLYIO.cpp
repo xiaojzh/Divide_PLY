@@ -1,7 +1,7 @@
 #include "../include/PLYIO.h"
 
 PLYIO::PLYIO(){
-    this->is_file_set = false;
+    this->is_in_file_set = false;
     this->NumOfOutFile = 10;
 }
 
@@ -9,7 +9,7 @@ PLYIO::~PLYIO(){}
 
 void PLYIO::setFileName(char const* filename){
     this->_in_file = filename;
-    this->is_file_set = true;
+    this->is_in_file_set = true;
 }
 
 void PLYIO::setNumOfOutFile(size_t NumOfOutFile){
@@ -49,7 +49,13 @@ void PLYIO::loadPLY(){
     }   
 }
 
-void PLYIO::dividePLY(){
+void PLYIO::divideNPLY(char const* filename, size_t NumOfOutFile){
+    // 读取文件名称
+    this->_in_file = filename; 
+    // 查看是否满足文件名的要求
+    this->is_in_file_set = true;
+    // 读取文件数
+
     size_t slidSizeOfPoint = this->numOfPoint / this->NumOfOutFile;
     // Point_XYZ *pts = new Point_XYZ[slidSizeOfPoint];
     Point_XYZ* pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
@@ -85,7 +91,7 @@ void PLYIO::dividePLY(){
 }
 
 void PLYIO::saveMap(Point_XYZ *point, char *fileName, size_t numOfPoint){
-    int elementNum = numOfPoint;
+    int elementNum = numOfPoint;    // 点的个数
     FILE *fp;
     if ((fp = fopen(fileName, "wb")) == NULL) 
     {
@@ -111,7 +117,7 @@ void PLYIO::saveMap(Point_XYZ *point, char *fileName, size_t numOfPoint){
 }
 
 bool PLYIO::run(){
-    if (!is_file_set)
+    if (!is_in_file_set)
     {
         cout << "Fail to set the file, pls to comform!!!" << endl;
         return false;
