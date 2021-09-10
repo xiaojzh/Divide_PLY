@@ -4,6 +4,7 @@
 #include <pcl-1.8/pcl/io/pcd_io.h>
 #include <pcl-1.8/pcl/io/ply_io.h>
 #include <pcl-1.8/pcl/point_types.h> 
+#include <pcl-1.8/pcl/filters/voxel_grid.h>
 
 using namespace std;
 
