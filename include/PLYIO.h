@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define LENGTH_OF_LINE 1024
 using namespace std;
 
 class PLYIO
@@ -22,9 +23,9 @@ struct Point_XYZ
     float x;
     float y;
     float z;
-    u_char red;
-    u_char green;
-    u_char blue;         // 使用时不标记颜色
+    unsigned char red;
+    unsigned char green;
+    unsigned char blue;         // 使用时不标记颜色
     // u_char end;
 };
 
@@ -34,7 +35,8 @@ private:
     size_t voxel_size = 60;  // 将每个小地图分为60*60*Height
     size_t NumOfOutFile;
 
-    char const *_in_file;
+    string _in_file;
+    string _out_file;
     FILE* file_open;
 
     size_t numOfPoint;
@@ -48,6 +50,7 @@ private:
     void loadPLY();
     void dividePLY();
     void saveMap(Point_XYZ *point, char *filename, size_t numOfPoint);
-    size_t sizeOfPoint = sizeof(float)*3 + sizeof(u_char)*3;
+    void divideNvoxel(string& inFile,string& outFile, size_t voxel_size);
+    size_t sizeOfPoint = sizeof(float)*3 + sizeof(unsigned char)*3;
 };
 #endif
