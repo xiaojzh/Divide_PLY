@@ -18,6 +18,7 @@
 #include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
+#include "common/util.h"
 
 using namespace std;
 
@@ -40,14 +41,15 @@ private:
     bool is_in_file_set;
     bool is_out_file_set;
     
-    char const* _in_file;
-    char const* _out_file;
+    string _in_file;
+    string _out_file;
     FILE* file_open;
     
     size_t numOfPoint;
-
-    size_t voxel_size = 60;  // 将每个小地图分为60*60*Height
-    size_t NumOfOutFile;
+    size_t numOfOutFile;
+    size_t sizeOfOutFile;
+    size_t voxel_size;  // 将每个小地图分为60*60*Height
+    
 
 
 
@@ -56,11 +58,12 @@ public:
     PLYIO(/* args */);
     ~PLYIO();
     // 分成指定文件数
-    void divideNPLY(char const* filename, size_t NumOfOutFile);
+    void divideNPLY(string& inFile, string& outFile, size_t numOfOutFile);
+    // 分成指定的大小
+    void divideNsize(string& inFile, string& outFile, size_t sizeOfOutFile);
+    // 分成指定方块
+    void divideNvoxel(string& inFile, string& outFile, size_t voxel_size);
 
-    // void setFileName (char const* filename);
-    // void setNumOfOutFile(size_t NumOfOutFile);
-    bool run();
 private:
     void loadPLY();
     void saveMap(Point_XYZ *point, char *filename, size_t numOfPoint);

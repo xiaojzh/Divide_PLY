@@ -2,23 +2,14 @@
 
 PLYIO::PLYIO(){
     this->is_in_file_set = false;
-    this->NumOfOutFile = 10;
+    this->numOfOutFile = 10;
 }
 
 PLYIO::~PLYIO(){}
 
-void PLYIO::setFileName(char const* filename){
-    this->_in_file = filename;
-    this->is_in_file_set = true;
-}
-
-void PLYIO::setNumOfOutFile(size_t NumOfOutFile){
-    this->NumOfOutFile = NumOfOutFile;
-    // this->is_out_num_file_set = true;
-}
-
 void PLYIO::loadPLY(){
-    file_open = fopen(_in_file,"rb");
+    char const* filename = this->_in_file.c_str();
+    file_open = fopen(filename,"rb");
     char strOfLine[1024];   // 读取行的内容
     char endHeadFlag[] = "end_header "; // 头文件结束标志
     char numOfPointFlag[] = "element vertex ";  // 点的个数，字符型
@@ -49,47 +40,6 @@ void PLYIO::loadPLY(){
     }   
 }
 
-void PLYIO::divideNPLY(char const* filename, size_t NumOfOutFile){
-    // 读取文件名称
-    this->_in_file = filename; 
-    // 查看是否满足文件名的要求
-    this->is_in_file_set = true;
-    // 读取文件数
-
-    size_t slidSizeOfPoint = this->numOfPoint / this->NumOfOutFile;
-    // Point_XYZ *pts = new Point_XYZ[slidSizeOfPoint];
-    Point_XYZ* pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
-    for (size_t i = 0; i < this->NumOfOutFile; i++)
-    {
-        // if (i == (this->NumOfOutFile -1))
-        // {
-            // slidSizeOfPoint = this->numOfPoint - i * slidSizeOfPoint;
-        // }
-        fread(pts,sizeOfPoint,slidSizeOfPoint,file_open);
-        char* fileName;
-        string fileName1;
-        fileName1 = "/home/ouong/WorkSpace/BAGs/DividedMap/ShanghaiTech_"+ to_string(i) + ".ply";
-        fileName = (char*)fileName1.c_str();
-        PLYIO::saveMap(pts,fileName,slidSizeOfPoint);
-        // free(pts);
-    } 
-    delete[] pts; 
-
-
-    // 最后一个文件
-    slidSizeOfPoint = this->numOfPoint - slidSizeOfPoint * this->NumOfOutFile;
-    // pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
-    pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
-    fread(pts,sizeOfPoint,slidSizeOfPoint,file_open);
-    char* fileName;
-    string fileName1;
-    fileName1 = "/home/ouong/WorkSpace/BAGs/DividedMap/ShanghaiTech_"+ to_string(this->NumOfOutFile) + ".ply";
-    fileName = (char*)fileName1.c_str();
-    PLYIO::saveMap(pts,fileName,slidSizeOfPoint);
-    fclose(this->file_open);
-    delete[] pts; 
-}
-
 void PLYIO::saveMap(Point_XYZ *point, char *fileName, size_t numOfPoint){
     int elementNum = numOfPoint;    // 点的个数
     FILE *fp;
@@ -108,22 +58,77 @@ void PLYIO::saveMap(Point_XYZ *point, char *fileName, size_t numOfPoint){
     fprintf(fp, "property uchar green\n");
     fprintf(fp, "property uchar blue\n");
 	fprintf(fp, "end_header\n");
-    // for (size_t i = 0; i < numOfPoint; i++)
-    // {
-    //     fwrite(*point[i],sizeof(Point_XYZ),1,fp);
-    // }
-    fwrite(point,sizeof(Point_XYZ),numOfPoint,fp);
+
+    // 改变了这里的sizeofpoint
+    fwrite(point,sizeOfPoint,numOfPoint,fp);
     fclose(fp);
 }
 
-bool PLYIO::run(){
-    if (!is_in_file_set)
+void PLYIO::divideNPLY(string& inFile, string& outFile, size_t numOfOutFile){
+    // 读取文件名称
+    this->_in_file = inFile; 
+    // 查看是否满足文件名的要求
+    if (!(EndWith(_in_file,".pcd") || EndWith(_in_file,".PCD")))
     {
-        cout << "Fail to set the file, pls to comform!!!" << endl;
-        return false;
+        cout << "ERROR: the file name is not end with .pcd" << endl;
+        return;
+    }
+    this->is_in_file_set = true;
+    this-> numOfOutFile = numOfOutFile;
+    if (this->numOfOutFile < 1)
+    {
+        cout << "ERROE: make sure the n > 0" << endl;
+        return;
+    }
+    // 读取文件
+    loadPLY();
+    size_t slidSizeOfPoint = this->numOfPoint / this->numOfOutFile;
+    Point_XYZ* pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
+    for (size_t i = 0; i < this->numOfOutFile; i++)
+    {
+
+        fread(pts,sizeOfPoint,slidSizeOfPoint,file_open);
+        char* fileName;
+        string fileName1;
+        fileName1 = outFile + "/ShanghaiTech_"+ to_string(i) + ".ply";
+        fileName = (char*)fileName1.c_str();
+        PLYIO::saveMap(pts,fileName,slidSizeOfPoint);
+    } 
+    delete[] pts; 
+
+ //    // 最后一个文件 (这个文件的点数很少，可以忽略)
+ //    slidSizeOfPoint = this->numOfPoint - slidSizeOfPoint * this->numOfOutFile;
+ //    // pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
+ //     pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
+ //     fread(pts,sizeOfPoint,slidSizeOfPoint,file_open);
+ //     char* fileName;
+ //     string fileName1;
+ //     fileName1 = "/home/ouong/WorkSpace/BAGs/DividedMap/ShanghaiTech_"+ to_string(this->numOfOutFile) + ".ply";
+ //     fileName = (char*)fileName1.c_str();
+ //     PLYIO::saveMap(pts,fileName,slidSizeOfPoint);
+ //     fclose(this->file_open);
+ //     delete[] pts; 
+}
+
+void PLYIO::divideNsize(string& inFile, string& outFile, size_t sizeOfOutFile){
+    // 转为n个文件
+    this->sizeOfOutFile = sizeOfOutFile;
+    loadPLY();
+    size_t numOfFile = numOfPoint *sizeOfPoint / this->sizeOfOutFile;
+    divideNPLY(inFile,outFile,numOfFile);
+}
+
+void PLYIO::divideNvoxel(string& inFile, string& outFile, size_t voxel_size){
+    size_t index_x, index_y;
+    loadPLY();
+    float* pts_xyz =  (float*) malloc (3 * sizeof(float));
+    u_char* pts_rgb = (u_char*) malloc (3 * sizeof(u_char));
+    // 利用fstream 进行读写
+    for (size_t i = 0; i < this->numOfPoint; i++)
+    {
+        fread(pts_xyz,sizeof(float),3,file_open);
+        fread(pts_rgb,sizeof(u_char),3,file_open);
+        
     }
     
-    PLYIO::loadPLY();
-    PLYIO::dividePLY();
-    return true;
 }
