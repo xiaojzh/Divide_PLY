@@ -10,7 +10,7 @@ include_directories(${PCL_INCLUDE_DIRS})
 link_directories(${PCL_LIBRARY_DIRS})
 add_definitions(${PCL_DEFINITIONS})
 # add_subdirectory(lib)
- 
+add_subdirectory(common)
  
 # add_executable(ply2pcd src/ply2pcd.cpp)  
 # target_link_libraries(ply2pcd divideMapLib ${PCL_LIBRARIES})
@@ -20,7 +20,7 @@ target_link_libraries(ply2pcd ${PCL_LIBRARIES})
 # add_executable(divideMap src/divideMap.cpp)
 # target_link_libraries(divideMap divideMapLib ${PCL_LIBRARIES})
 add_executable(divideMap src/divideMap.cpp lib/PLYIO.cpp)
-target_link_libraries(divideMap ${PCL_LIBRARIES})
+target_link_libraries(divideMap utilLib ${PCL_LIBRARIES})
 
 # 设置gdb
 SET(CMAKE_BUILD_TYPE "Debug")

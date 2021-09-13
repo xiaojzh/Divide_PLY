@@ -18,7 +18,7 @@
 #include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
-#include "common/util.h"
+#include "../common/util.h"
 
 #define LENGTH_OF_LINE 1024
 using namespace std;
@@ -59,11 +59,11 @@ public:
     PLYIO(/* args */);
     ~PLYIO();
     // 分成指定文件数
-    void divideNPLY(string& inFile, string& outFile, size_t numOfOutFile);
+    void divideNPLY(const string& inFile, const string& outFile, size_t numOfOutFile);
     // 分成指定的大小
-    void divideNsize(string& inFile, string& outFile, size_t sizeOfOutFile);
+    void divideNsize(const string& inFile, const string& outFile, size_t sizeOfOutFile);
     // 分成指定方块
-    void divideNvoxel(string& inFile, string& outFile, size_t voxel_size);
+    void divideNvoxel(const string& inFile, const string& outFile, size_t voxel_size);
 
 private:
     void loadPLY();

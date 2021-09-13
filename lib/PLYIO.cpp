@@ -1,5 +1,7 @@
 #include "../include/PLYIO.h"
 
+void writeHeader(char const* filename, size_t numOfPoint);
+
 PLYIO::PLYIO(){
     this->is_in_file_set = false;
     this->numOfOutFile = 10;
@@ -71,7 +73,7 @@ void PLYIO::divideNPLY(const string& inFile, const string& outFile, size_t numOf
     // 读取文件名称
     this->_in_file = inFile; 
     // 查看是否满足文件名的要求
-    if (!(EndWith(_in_file,".pcd") || EndWith(_in_file,".PCD")))
+    if (!(EndWith(_in_file,".ply") || EndWith(_in_file,".PLY")))
     {
         cout << "ERROR: the file name is not end with .pcd" << endl;
         return;
@@ -115,8 +117,10 @@ void PLYIO::divideNPLY(const string& inFile, const string& outFile, size_t numOf
 
 void PLYIO::divideNsize(const string& inFile, const string& outFile, size_t sizeOfOutFile){
     // 转为n个文件
+    this->_in_file = inFile;
     this->sizeOfOutFile = sizeOfOutFile;
     loadPLY();
+    fclose(file_open);
     size_t numOfFile = numOfPoint *sizeOfPoint / this->sizeOfOutFile;
     divideNPLY(inFile,outFile,numOfFile);
 }
@@ -138,26 +142,35 @@ void PLYIO::divideNvoxel(const string& inFile, const string& outFile, size_t vox
         // index_y_min = 100000;    // 如果检索的话，x最大值不一定匹配y的最大值
     FILE *fp;
     string fileName;            // 输出文件名，命名原则是根据点云中起始点
-    char line[LENGTH_OF_LINE];
+    // char line[LENGTH_OF_LINE];
     char is_first_open[100*100] = {0};    // 用来检索哪个文件被读写过
-    for (size_t i = 0; i < this->sizeOfPoint; i++)
+    for (size_t i = 0; i < this->numOfPoint; i++)
     {          
         fread(pts_xyz,3,sizeof(float),file_open);
         fread(pts_rgb,3,sizeof(u_char),file_open);
         // 需要考虑点在负坐标轴
-        index_x = (pts_xyz[0] < 0) ? (pts_xyz[0] / float(voxel_size) - 1) : (pts_xyz[0] / float(voxel_size));
-        index_y = (pts_xyz[1] < 0) ? (pts_xyz[1] / float(voxel_size) - 1) : (pts_xyz[1] / float(voxel_size));
-        
-        fileName = this->_out_file + "/" + "ShanghaiTech_" + to_string(index_x) + "_" + to_string(index_y);
-        if ((fp = fopen(fileName.c_str(), "ab")) == NULL) 
+        index_x = (pts_xyz[1] < 0) ? (pts_xyz[1] / float(voxel_size) - 1) : (pts_xyz[1] / float(voxel_size));
+        index_y = (pts_xyz[2] < 0) ? (pts_xyz[2] / float(voxel_size) - 1) : (pts_xyz[2] / float(voxel_size));
+
+        // 记录被打开的输出文件的检索
+        int index_file = index_x * 100 + index_y + 5000;    // 加5000进行偏移，由于数组的检索不能是小于0的数
+
+        fileName = this->_out_file + "/" + "ShanghaiTech_" + to_string(index_x) + "_" + to_string(index_y) + ".ply";
+        if (is_first_open[index_file] != 0)
         {
-            cout << "Error: cann't open the out files" << endl;
+            if ((fp = fopen(fileName.c_str(), "ab")) == NULL) 
+            {
+                cout << "Error: cann't open the out files" << endl;
+            }
+        } else {
+            if ((fp = fopen(fileName.c_str(), "wb")) == NULL) 
+            {
+                cout << "Error: cann't open the out files" << endl;
+            }
         }
         fwrite(pts_xyz,3,sizeof(float),fp);
         fwrite(pts_rgb,3,sizeof(u_char),fp);
         fclose(fp);
-        // 记录被打开的输出文件的检索
-        int index_file = index_x * 100 + index_y + 5000;    // 加5000进行偏移，由于数组的检索不能是小于0的数
         is_first_open[index_file] += 1;                     // 用于记录这个voxel中的点的个数
         // 所以依然选择利用一个检索文件进行维护输出文件列表，这样方便后面添加header
         // bool is_first_open = true;
@@ -177,14 +190,17 @@ void PLYIO::divideNvoxel(const string& inFile, const string& outFile, size_t vox
             // }
         // } // 用一个数组进行维护，index[x*100+y] = 1,表示存在这个文件，再进行解码
     }
+    delete[] pts_xyz;
+    delete[] pts_rgb;
+
     for (size_t i = 0; i < 100*100; i++)
     {
         if (is_first_open[i] == 0)
         {
             continue;
         }
-        int _index_x = (i - 500) / 100;
-        int _index_y = (i - 500) % 100;
+        int _index_x = (i - 5000) / 100;
+        int _index_y = (i - 5000) % 100;
         string _index_fileName  = this->_out_file + "/" + "ShanghaiTech_" 
                                 + to_string(_index_x) + "_" + to_string(_index_y);
         size_t numOfPoint = is_first_open[i];
