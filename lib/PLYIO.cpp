@@ -67,7 +67,7 @@ void PLYIO::saveMap(Point_XYZ *point, char *fileName, size_t numOfPoint){
     fclose(fp);
 }
 
-void PLYIO::divideNPLY(string& inFile, string& outFile, size_t numOfOutFile){
+void PLYIO::divideNPLY(const string& inFile, const string& outFile, size_t numOfOutFile){
     // 读取文件名称
     this->_in_file = inFile; 
     // 查看是否满足文件名的要求
@@ -113,7 +113,7 @@ void PLYIO::divideNPLY(string& inFile, string& outFile, size_t numOfOutFile){
  //     delete[] pts; 
 }
 
-void PLYIO::divideNsize(string& inFile, string& outFile, size_t sizeOfOutFile){
+void PLYIO::divideNsize(const string& inFile, const string& outFile, size_t sizeOfOutFile){
     // 转为n个文件
     this->sizeOfOutFile = sizeOfOutFile;
     loadPLY();
@@ -121,7 +121,7 @@ void PLYIO::divideNsize(string& inFile, string& outFile, size_t sizeOfOutFile){
     divideNPLY(inFile,outFile,numOfFile);
 }
 
-void PLYIO::divideNvoxel(string& inFile, string& outFile, size_t voxel_size){
+void PLYIO::divideNvoxel(const string& inFile, const string& outFile, size_t voxel_size){
     this->_in_file = inFile;
     this->_out_file = outFile;    
     loadPLY();
