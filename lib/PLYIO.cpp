@@ -3,9 +3,12 @@
 PLYIO::PLYIO(){
     this->is_in_file_set = false;
     this->numOfOutFile = 10;
+    this-> voxel_size = 60;
 }
 
-PLYIO::~PLYIO(){}
+PLYIO::~PLYIO(){
+    fclose(file_open);
+}
 
 void PLYIO::loadPLY(){
     char const* filename = this->_in_file.c_str();
