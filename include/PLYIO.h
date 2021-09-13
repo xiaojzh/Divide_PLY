@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include "common/util.h"
 
+#define LENGTH_OF_LINE 1024
 using namespace std;
 
 class PLYIO
