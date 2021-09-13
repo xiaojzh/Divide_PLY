@@ -8,12 +8,8 @@ PLYIO::PLYIO(){
 PLYIO::~PLYIO(){}
 
 void PLYIO::loadPLY(){
-<<<<<<< HEAD
     char const* filename = this->_in_file.c_str();
     file_open = fopen(filename,"rb");
-=======
-    file_open = fopen(_in_file.c_str(),"rb");
->>>>>>> dev_yu
     char strOfLine[1024];   // 读取行的内容
     char endHeadFlag[] = "end_header "; // 头文件结束标志
     char numOfPointFlag[] = "element vertex ";  // 点的个数，字符型
@@ -123,32 +119,13 @@ void PLYIO::divideNsize(string& inFile, string& outFile, size_t sizeOfOutFile){
 }
 
 void PLYIO::divideNvoxel(string& inFile, string& outFile, size_t voxel_size){
-    size_t index_x, index_y;
-    loadPLY();
-    float* pts_xyz =  (float*) malloc (3 * sizeof(float));
-    u_char* pts_rgb = (u_char*) malloc (3 * sizeof(u_char));
-    // 利用fstream 进行读写
-    for (size_t i = 0; i < this->numOfPoint; i++)
-    {
-        fread(pts_xyz,sizeof(float),3,file_open);
-        fread(pts_rgb,sizeof(u_char),3,file_open);
-        
-    }
-    
-<<<<<<< HEAD
-=======
-    PLYIO::loadPLY();
-    PLYIO::dividePLY();
-    return true;
-}
-
-void PLYIO::divideNvoxel(string& inFile,string& outFile, size_t voxel_size){
     this->_in_file = inFile;
-    this->_out_file = outFile;
+    this->_out_file = outFile;    
     loadPLY();
+
     // 分配内存空间
     float* pts_xyz = (float*) malloc (3*sizeof(float));
-    unsigned char* pts_rgb = (unsigned char*) malloc (3*sizeof(unsigned char));
+    u_char* pts_rgb = (u_char*) malloc (3*sizeof(u_char));
     
     int index_x, index_y;    // 根据点的位置，进行分配
     // 记录最大的以及最小的，之后方便添加header
@@ -156,47 +133,79 @@ void PLYIO::divideNvoxel(string& inFile,string& outFile, size_t voxel_size){
         // index_x_min = 100000,
         // index_y_max = -100000,
         // index_y_min = 100000;    // 如果检索的话，x最大值不一定匹配y的最大值
+    FILE *fp;
     string fileName;            // 输出文件名，命名原则是根据点云中起始点
     char line[LENGTH_OF_LINE];
+    char is_first_open[100*100] = {0};    // 用来检索哪个文件被读写过
     for (size_t i = 0; i < this->sizeOfPoint; i++)
     {          
         fread(pts_xyz,3,sizeof(float),file_open);
-        fread(pts_rgb,3,sizeof(unsigned char),file_open);
+        fread(pts_rgb,3,sizeof(u_char),file_open);
         // 需要考虑点在负坐标轴
         index_x = (pts_xyz[0] < 0) ? (pts_xyz[0] / float(voxel_size) - 1) : (pts_xyz[0] / float(voxel_size));
         index_y = (pts_xyz[1] < 0) ? (pts_xyz[1] / float(voxel_size) - 1) : (pts_xyz[1] / float(voxel_size));
         
         fileName = this->_out_file + "/" + "ShanghaiTech_" + to_string(index_x) + "_" + to_string(index_y);
-        FILE *fp;
-        if ((fp = fopen(fileName.c_str(), "wb")) == NULL) 
+        if ((fp = fopen(fileName.c_str(), "ab")) == NULL) 
         {
             cout << "Error: cann't open the out files" << endl;
         }
         fwrite(pts_xyz,3,sizeof(float),fp);
-        fwrite(pts_rgb,3,sizeof(unsigned char),fp);
+        fwrite(pts_rgb,3,sizeof(u_char),fp);
         fclose(fp);
-
+        // 记录被打开的输出文件的检索
+        int index_file = index_x * 100 + index_y + 5000;    // 加5000进行偏移，由于数组的检索不能是小于0的数
+        is_first_open[index_file] += 1;                     // 用于记录这个voxel中的点的个数
         // 所以依然选择利用一个检索文件进行维护输出文件列表，这样方便后面添加header
-        bool is_first_open = true;
-        char line[LENGTH_OF_LINE];
-        FILE* index_fp;
-        string index_file = _out_file + "/indexOutFile.dat";
-        if ((index_fp = fopen(index_file.c_str(),"ab+"))==NULL)
+        // bool is_first_open = true;
+        // char line[LENGTH_OF_LINE];
+        // FILE* index_fp;
+        // string index_file = _out_file + "/indexOutFile.dat";
+        // if ((index_fp = fopen(index_file.c_str(),"ab+"))==NULL)
+        // {
+            // cout << "Error: cann't open the index file" << endl;
+        // }
+        // while (fgets(line,LENGTH_OF_LINE,index_fp))
+        // {
+            // if (strstr(line,fileName.c_str()) != NULL)
+            // {
+                // is_first_open = false;
+                // break;
+            // }
+        // } // 用一个数组进行维护，index[x*100+y] = 1,表示存在这个文件，再进行解码
+    }
+    for (size_t i = 0; i < 100*100; i++)
+    {
+        if (is_first_open[i] == 0)
         {
-            cout << "Error: cann't open the index file" << endl;
+            continue;
         }
-        while (fgets(line,LENGTH_OF_LINE,index_fp))
-        {
-            if (strstr(line,fileName.c_str()) != NULL)
-            {
-                is_first_open = false;
-                break;
-            }
-        } // 用一个数组进行维护，index[x*100+y] = 1,表示存在这个文件，再进行解码
+        int _index_x = (i - 500) / 100;
+        int _index_y = (i - 500) % 100;
+        string _index_fileName  = this->_out_file + "/" + "ShanghaiTech_" 
+                                + to_string(_index_x) + "_" + to_string(_index_y);
+        size_t numOfPoint = is_first_open[i];
+        writeHeader(_index_fileName.c_str(),numOfPoint);
     }
 }
 
-void writeHeader(char* filename){
-    FILE* fp = fopen();
->>>>>>> dev_yu
+void writeHeader(char const* filename, size_t numOfPoint){
+    int elementNum = numOfPoint;    // 点的个数
+    FILE *fp;
+    if ((fp = fopen(filename, "ab")) == NULL) 
+    {
+        cout << "Error: cann't open the out files" << endl;
+    }
+    rewind(fp);     // 将写指针回到开头
+    fprintf(fp,"ply\n");
+    fprintf(fp, "format binary_little_endian 1.0\n");
+	fprintf(fp, "comment File generated v1.0 (xiaojzh)\n");
+	fprintf(fp, "element vertex %d\n", elementNum);
+	fprintf(fp, "property float x\n");
+	fprintf(fp, "property float y\n");
+	fprintf(fp, "property float z\n");
+    fprintf(fp, "property uchar red\n");
+    fprintf(fp, "property uchar green\n");
+    fprintf(fp, "property uchar blue\n");
+	fprintf(fp, "end_header\n");
 }
