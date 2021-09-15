@@ -18,6 +18,9 @@
 #include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
+#include <memory.h>
+#include <sys/stat.h>
 #include "../common/util.h"
 
 #define LENGTH_OF_LINE 1024
@@ -64,7 +67,9 @@ public:
     void divideNsize(const string& inFile, const string& outFile, size_t sizeOfOutFile);
     // 分成指定方块
     void divideNvoxel(const string& inFile, const string& outFile, size_t voxel_size);
-
+    // 在文件开头添加抬头
+    void writeHeader(string dirpath);
+    
 private:
     void loadPLY();
     void saveMap(Point_XYZ *point, char *filename, size_t numOfPoint);
