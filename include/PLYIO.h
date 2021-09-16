@@ -69,9 +69,11 @@ public:
     void divideNvoxel(const string& inFile, const string& outFile, size_t voxel_size);
     // 在文件开头添加抬头
     void writeHeader(string dirpath);
+    // 将z轴上超过6m的去掉，降低加载速度
+    void cutTheHight(string dirpath);
     
 private:
-    void loadPLY();
+    void loadPLY(char const* filename);
     void saveMap(Point_XYZ *point, char *filename, size_t numOfPoint);
 };
 #endif

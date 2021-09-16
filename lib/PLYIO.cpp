@@ -12,8 +12,7 @@ PLYIO::~PLYIO(){
     fclose(file_open);
 }
 
-void PLYIO::loadPLY(){
-    char const* filename = this->_in_file.c_str();
+void PLYIO::loadPLY(char const* filename){
     file_open = fopen(filename,"rb");
     char strOfLine[1024];   // 读取行的内容
     char endHeadFlag[] = "end_header "; // 头文件结束标志
@@ -86,7 +85,7 @@ void PLYIO::divideNPLY(const string& inFile, const string& outFile, size_t numOf
         return;
     }
     // 读取文件
-    loadPLY();
+    loadPLY(this->_in_file.c_str());
     size_t slidSizeOfPoint = this->numOfPoint / this->numOfOutFile;
     Point_XYZ* pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
     for (size_t i = 0; i < this->numOfOutFile; i++)
@@ -100,26 +99,13 @@ void PLYIO::divideNPLY(const string& inFile, const string& outFile, size_t numOf
         PLYIO::saveMap(pts,fileName,slidSizeOfPoint);
     } 
     delete[] pts; 
-
- //    // 最后一个文件 (这个文件的点数很少，可以忽略)
- //    slidSizeOfPoint = this->numOfPoint - slidSizeOfPoint * this->numOfOutFile;
- //    // pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
- //     pts = (Point_XYZ*)malloc(slidSizeOfPoint*sizeOfPoint);
- //     fread(pts,sizeOfPoint,slidSizeOfPoint,file_open);
- //     char* fileName;
- //     string fileName1;
- //     fileName1 = "/home/ouong/WorkSpace/BAGs/DividedMap/ShanghaiTech_"+ to_string(this->numOfOutFile) + ".ply";
- //     fileName = (char*)fileName1.c_str();
- //     PLYIO::saveMap(pts,fileName,slidSizeOfPoint);
- //     fclose(this->file_open);
- //     delete[] pts; 
 }
 
 void PLYIO::divideNsize(const string& inFile, const string& outFile, size_t sizeOfOutFile){
     // 转为n个文件
     this->_in_file = inFile;
     this->sizeOfOutFile = sizeOfOutFile;
-    loadPLY();
+    loadPLY(this->_in_file.c_str());
     fclose(file_open);
     size_t numOfFile = numOfPoint *sizeOfPoint / this->sizeOfOutFile;
     divideNPLY(inFile,outFile,numOfFile);
@@ -128,18 +114,13 @@ void PLYIO::divideNsize(const string& inFile, const string& outFile, size_t size
 void PLYIO::divideNvoxel(const string& inFile, const string& outFile, size_t voxel_size){
     this->_in_file = inFile;
     this->_out_file = outFile;    
-    loadPLY();
+    loadPLY(this->_in_file.c_str());
 
     // 分配内存空间
     float* pts_xyz = (float*) malloc (3*sizeof(float));
     u_char* pts_rgb = (u_char*) malloc (3*sizeof(u_char));
     
     int index_x, index_y;    // 根据点的位置，进行分配
-    // 记录最大的以及最小的，之后方便添加header
-    // int index_x_max = -100000,
-        // index_x_min = 100000,
-        // index_y_max = -100000,
-        // index_y_min = 100000;    // 如果检索的话，x最大值不一定匹配y的最大值
     FILE *fp;
     string fileName;            // 输出文件名，命名原则是根据点云中起始点
     // char line[LENGTH_OF_LINE];
@@ -174,65 +155,11 @@ void PLYIO::divideNvoxel(const string& inFile, const string& outFile, size_t vox
         fwrite(pts_rgb,3,sizeof(u_char),fp);
         fclose(fp);
         is_first_open[index_file] += 1;                     // 用于记录这个voxel中的点的个数
-        // 所以依然选择利用一个检索文件进行维护输出文件列表，这样方便后面添加header
-        // bool is_first_open = true;
-        // char line[LENGTH_OF_LINE];
-        // FILE* index_fp;
-        // string index_file = _out_file + "/indexOutFile.dat";
-        // if ((index_fp = fopen(index_file.c_str(),"ab+"))==NULL)
-        // {
-            // cout << "Error: cann't open the index file" << endl;
-        // }
-        // while (fgets(line,LENGTH_OF_LINE,index_fp))
-        // {
-            // if (strstr(line,fileName.c_str()) != NULL)
-            // {
-                // is_first_open = false;
-                // break;
-            // }
-        // } // 用一个数组进行维护，index[x*100+y] = 1,表示存在这个文件，再进行解码
     }
     delete[] pts_xyz;
     delete[] pts_rgb;
-
-    // for (int i = 0; i < 100*100; i++)   // i 使用uchar类型会导致后面计算出现强制类型转换
-    // {
-    //     if (is_first_open[i] == 0)
-    //     {
-    //         continue;
-    //     }
-    //     int _index_x = i / 100 - 20;
-    //     int _index_y = i % 100 - 20;
-    //     string _index_fileName  = this->_out_file + "/" + "ShanghaiTech_" 
-    //                             + to_string(_index_x) + "_" + to_string(_index_y) + ".ply";
-    //     size_t numOfPoint = is_first_open[i];
-    //     writeHeader(_index_fileName.c_str(),numOfPoint);
-    // }
     writeHeader(_out_file);
 }
-
-// void writeHeader(char const* filename, size_t numOfPoint){
-//     int elementNum = numOfPoint;    // 点的个数
-//     FILE *fp;
-//     if ((fp = fopen(filename, "ab")) == NULL) 
-//     {
-//         cout << "Error: cann't open the out files" << endl;
-//     }
-//     // rewind(fp);     // 将写指针回到开头 貌似没有起到作用
-//     fseek(fp, 0, SEEK_SET);  // 对于读取有用，写的话只能新建一个，然后添加新的内容，再写上原内容，最后改名
-//     fprintf(fp,"ply\n");
-//     fprintf(fp, "format binary_little_endian 1.0\n");
-// 	fprintf(fp, "comment File generated v1.0 (xiaojzh)\n");
-// 	fprintf(fp, "element vertex %d\n", elementNum);
-// 	fprintf(fp, "property float x\n");
-// 	fprintf(fp, "property float y\n");
-// 	fprintf(fp, "property float z\n");
-//     fprintf(fp, "property uchar red\n");
-//     fprintf(fp, "property uchar green\n");
-//     fprintf(fp, "property uchar blue\n");
-// 	fprintf(fp, "end_header\n");
-//     fclose(fp);
-// }
 
 void PLYIO::writeHeader(string dirpath){
     // 首先获取当前文件夹下的文件名
@@ -241,7 +168,7 @@ void PLYIO::writeHeader(string dirpath){
     DIR* dir = opendir(dirpath.c_str());
     if (dir == NULL)
     {
-        cout << "Error: cann't open the dir" << endl;
+        cout << "Error: cann't open the " << dirpath << endl;
     }
 
     vector<string> allPath;
@@ -302,4 +229,90 @@ void PLYIO::writeHeader(string dirpath){
         remove(fileName.c_str());
         rename(tmpFileName.c_str(),fileName.c_str());
     }
+}
+
+void PLYIO::cutTheHight(string dirpath){
+    DIR* dir = opendir(dirpath.c_str());
+    if (dir == NULL)
+    {
+        cout << "Error: cann't open the " << dirpath << endl;
+    }
+
+    vector<string> allPath;
+    // vector<size_t> sizeOffile;
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        //cout << "name = " << entry->d_name << ", len = " << entry->d_reclen << ", entry->d_type = " << (int)entry->d_type << endl;
+        string name = entry->d_name;
+        // string imgdir = dirpath +"/cut/"+ name;
+        //sprintf("%s",imgdir.c_str());
+        if (!(EndWith(name,".ply") || EndWith(name,".PLY")))
+        {
+            continue;
+        }
+        allPath.push_back(name);
+        // sizeOffile.push_back(entry->d_reclen); 这个获取的是文件名的长度
+    }
+    closedir(dir); 
+
+    string fileName, tmp_fileName, tmp_fileName1;
+    FILE *tmp_fp; //*tmp_fp1;
+    // struct stat statbuf;
+    // size_t sizeOfFile,elementNum;
+    float* pts_xyz = (float*)malloc(sizeof(float) * 3);
+    u_char* pts_rgb = (u_char*)malloc(sizeof(u_char) * 3);
+    for (size_t i = 0; i < allPath.size(); i++)
+    {
+        tmp_fileName = dirpath + "/cut/" + allPath[i];
+        tmp_fp = fopen(tmp_fileName.c_str(),"wb");
+        fileName = dirpath + "/" + allPath[i];
+        loadPLY(fileName.c_str());
+        for (size_t j = 0; j < this ->numOfPoint ; j++)
+        {
+            fread(pts_xyz,sizeof(float),3,file_open);
+            fread(pts_rgb,sizeof(u_char),3,file_open);
+            if (pts_xyz[2] > 46 || pts_xyz[2] < 10)
+            {
+                continue;
+            }
+            fwrite(pts_xyz,sizeof(float),3,tmp_fp);
+            fwrite(pts_rgb,sizeof(u_char),3,tmp_fp);
+        }
+        fclose(file_open);
+        fclose(tmp_fp);
+    }
+    delete[] pts_xyz;
+    delete[] pts_rgb;
+
+    string selectDir = dirpath + "/cut";
+    writeHeader(selectDir);
+        // 写开头和改名字
+        // tmp_fileName1 = dirpath + "/cut/" + fileName;
+        // tmp_fp1 = fopen(tmp_fileName1.c_str(),"wb");
+        // stat(fileName.c_str(),&statbuf);
+        // sizeOfFile = statbuf.st_size;
+        // elementNum = sizeOfFile / sizeOfPoint;       // 每一个点占据15byte
+
+        // fprintf(tmp_fp1,"ply\n");
+        // fprintf(tmp_fp1, "format binary_little_endian 1.0\n");
+        // fprintf(tmp_fp1, "comment File generated v1.0 (xiaojzh)\n");
+        // fprintf(tmp_fp1, "element vertex %ld\n", elementNum);
+        // fprintf(tmp_fp1, "property float x\n");
+        // fprintf(tmp_fp1, "property float y\n");
+        // fprintf(tmp_fp1, "property float z\n");
+        // fprintf(tmp_fp1, "property uchar red\n");
+        // fprintf(tmp_fp1, "property uchar green\n");
+        // fprintf(tmp_fp1, "property uchar blue\n");
+        // fprintf(tmp_fp1, "end_header\n");
+        // if ((tmp_fp = fopen(tmp_fileName.c_str(),"rb")) == NULL)
+        // {
+        //     cout << "Error: cann't open the" << fileName << "files" << endl;
+        // }
+        // Point_XYZ* pts = (Point_XYZ*)malloc(elementNum*sizeOfPoint);
+        // fread(pts,sizeOfPoint,elementNum,tmp_fp);
+        // fwrite(pts,sizeOfPoint,elementNum,tmp_fp1);
+        // fclose(tmp_fp1);
+        // fclose(tmp_fp);
+    
 }
