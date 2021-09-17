@@ -287,32 +287,4 @@ void PLYIO::cutTheHight(string dirpath){
 
     string selectDir = dirpath + "/cut";
     writeHeader(selectDir);
-        // 写开头和改名字
-        // tmp_fileName1 = dirpath + "/cut/" + fileName;
-        // tmp_fp1 = fopen(tmp_fileName1.c_str(),"wb");
-        // stat(fileName.c_str(),&statbuf);
-        // sizeOfFile = statbuf.st_size;
-        // elementNum = sizeOfFile / sizeOfPoint;       // 每一个点占据15byte
-
-        // fprintf(tmp_fp1,"ply\n");
-        // fprintf(tmp_fp1, "format binary_little_endian 1.0\n");
-        // fprintf(tmp_fp1, "comment File generated v1.0 (xiaojzh)\n");
-        // fprintf(tmp_fp1, "element vertex %ld\n", elementNum);
-        // fprintf(tmp_fp1, "property float x\n");
-        // fprintf(tmp_fp1, "property float y\n");
-        // fprintf(tmp_fp1, "property float z\n");
-        // fprintf(tmp_fp1, "property uchar red\n");
-        // fprintf(tmp_fp1, "property uchar green\n");
-        // fprintf(tmp_fp1, "property uchar blue\n");
-        // fprintf(tmp_fp1, "end_header\n");
-        // if ((tmp_fp = fopen(tmp_fileName.c_str(),"rb")) == NULL)
-        // {
-        //     cout << "Error: cann't open the" << fileName << "files" << endl;
-        // }
-        // Point_XYZ* pts = (Point_XYZ*)malloc(elementNum*sizeOfPoint);
-        // fread(pts,sizeOfPoint,elementNum,tmp_fp);
-        // fwrite(pts,sizeOfPoint,elementNum,tmp_fp1);
-        // fclose(tmp_fp1);
-        // fclose(tmp_fp);
-    
 }
