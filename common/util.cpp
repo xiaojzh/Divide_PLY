@@ -21,3 +21,25 @@ bool EndWith(const std::string &original,
          original.substr(original.length() - pattern.length()) == pattern;
 }
 
+std::vector<std::string> readFileName(std::string dirpath){
+    DIR* dir = opendir(dirpath.c_str());
+    if (dir == NULL)
+    {
+        cout << "Error: cann't open the " << dirpath << endl;
+    }
+
+    std::vector<std::string> allName;
+    // vector<size_t> sizeOffile;
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL)
+    {
+        //cout << "name = " << entry->d_name << ", len = " << entry->d_reclen << ", entry->d_type = " << (int)entry->d_type << endl;
+        string name = entry->d_name;
+        // string imgdir = dirpath +"/"+ name;
+        //sprintf("%s",imgdir.c_str());
+        allName.push_back(name);
+        // sizeOffile.push_back(entry->d_reclen); 这个获取的是文件名的长度
+    }
+    closedir(dir);
+    return allName;
+}

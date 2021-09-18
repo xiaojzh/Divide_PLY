@@ -1,7 +1,5 @@
 #include "../include/PLYIO.h"
 
-void writeHeader(char const* filename, size_t numOfPoint);
-
 PLYIO::PLYIO(){
     this->is_in_file_set = false;
     this->numOfOutFile = 10;
@@ -165,33 +163,36 @@ void PLYIO::writeHeader(string dirpath){
     // 首先获取当前文件夹下的文件名
     // 再计算每一个文件的大小，字节数除以15就是点数
     // 新建一个新文件，添加header，并且将原文件内容复制到后面
-    DIR* dir = opendir(dirpath.c_str());
-    if (dir == NULL)
-    {
-        cout << "Error: cann't open the " << dirpath << endl;
-    }
+    // DIR* dir = opendir(dirpath.c_str());
+    // if (dir == NULL)
+    // {
+    //     cout << "Error: cann't open the " << dirpath << endl;
+    // }
 
-    vector<string> allPath;
-    // vector<size_t> sizeOffile;
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL)
-    {
-        //cout << "name = " << entry->d_name << ", len = " << entry->d_reclen << ", entry->d_type = " << (int)entry->d_type << endl;
-        string name = entry->d_name;
-        string imgdir = dirpath +"/"+ name;
-        //sprintf("%s",imgdir.c_str());
-        allPath.push_back(imgdir);
-        // sizeOffile.push_back(entry->d_reclen); 这个获取的是文件名的长度
-    }
-    closedir(dir);  
+    // vector<string> allPath;
+    // // vector<size_t> sizeOffile;
+    // struct dirent *entry;
+    // while ((entry = readdir(dir)) != NULL)
+    // {
+    //     //cout << "name = " << entry->d_name << ", len = " << entry->d_reclen << ", entry->d_type = " << (int)entry->d_type << endl;
+    //     string name = entry->d_name;
+    //     string imgdir = dirpath +"/"+ name;
+    //     //sprintf("%s",imgdir.c_str());
+    //     allPath.push_back(imgdir);
+    //     // sizeOffile.push_back(entry->d_reclen); 这个获取的是文件名的长度
+    // }
+    // closedir(dir);  
+    //获取文件夹下面的文件名 
+    vector<string> allName;
+    allName = readFileName(dirpath);
 
     FILE *fp, *tmp_fp;
     string fileName, tmpFileName = dirpath + "/tmp.ply";
     struct stat statbuf;
     size_t sizeOfFile, elementNum;
-    for (size_t i = 0; i < allPath.size(); i++)
+    for (size_t i = 0; i < allName.size(); i++)
     {
-        fileName = allPath[i];
+        fileName = dirpath + "/" + allName[i];
         stat(fileName.c_str(),&statbuf);
         sizeOfFile = statbuf.st_size;
         elementNum = sizeOfFile / sizeOfPoint;       // 每一个点占据15byte
@@ -232,29 +233,31 @@ void PLYIO::writeHeader(string dirpath){
 }
 
 void PLYIO::cutTheHight(string dirpath){
-    DIR* dir = opendir(dirpath.c_str());
-    if (dir == NULL)
-    {
-        cout << "Error: cann't open the " << dirpath << endl;
-    }
+    // DIR* dir = opendir(dirpath.c_str());
+    // if (dir == NULL)
+    // {
+    //     cout << "Error: cann't open the " << dirpath << endl;
+    // }
 
-    vector<string> allPath;
-    // vector<size_t> sizeOffile;
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL)
-    {
-        //cout << "name = " << entry->d_name << ", len = " << entry->d_reclen << ", entry->d_type = " << (int)entry->d_type << endl;
-        string name = entry->d_name;
-        // string imgdir = dirpath +"/cut/"+ name;
-        //sprintf("%s",imgdir.c_str());
-        if (!(EndWith(name,".ply") || EndWith(name,".PLY")))
-        {
-            continue;
-        }
-        allPath.push_back(name);
-        // sizeOffile.push_back(entry->d_reclen); 这个获取的是文件名的长度
-    }
-    closedir(dir); 
+    // vector<string> allPath;
+    // // vector<size_t> sizeOffile;
+    // struct dirent *entry;
+    // while ((entry = readdir(dir)) != NULL)
+    // {
+    //     //cout << "name = " << entry->d_name << ", len = " << entry->d_reclen << ", entry->d_type = " << (int)entry->d_type << endl;
+    //     string name = entry->d_name;
+    //     // string imgdir = dirpath +"/cut/"+ name;
+    //     //sprintf("%s",imgdir.c_str());
+    //     if (!(EndWith(name,".ply") || EndWith(name,".PLY")))
+    //     {
+    //         continue;
+    //     }
+    //     allPath.push_back(name);
+    //     // sizeOffile.push_back(entry->d_reclen); 这个获取的是文件名的长度
+    // }
+    // closedir(dir); 
+    vector<string> allName;
+    allName = readFileName(dirpath);
 
     string fileName, tmp_fileName, tmp_fileName1;
     FILE *tmp_fp; //*tmp_fp1;
@@ -262,11 +265,11 @@ void PLYIO::cutTheHight(string dirpath){
     // size_t sizeOfFile,elementNum;
     float* pts_xyz = (float*)malloc(sizeof(float) * 3);
     u_char* pts_rgb = (u_char*)malloc(sizeof(u_char) * 3);
-    for (size_t i = 0; i < allPath.size(); i++)
+    for (size_t i = 0; i < allName.size(); i++)
     {
-        tmp_fileName = dirpath + "/cut/" + allPath[i];
+        tmp_fileName = dirpath + "/cut/" + allName[i];
         tmp_fp = fopen(tmp_fileName.c_str(),"wb");
-        fileName = dirpath + "/" + allPath[i];
+        fileName = dirpath + "/" + allName[i];
         loadPLY(fileName.c_str());
         for (size_t j = 0; j < this ->numOfPoint ; j++)
         {
